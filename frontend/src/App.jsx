@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import AddPatient from './components/AddPatient';
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       {/* Page Content Switcher */}
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/add-patient" element={<h3>Add Patient Form (Coming Next!)</h3>} />
+        <Route path="/add-patient" element={<AddPatient />} />
         <Route path="/add-session" element={<h3>Add Session Form (Coming Next!)</h3>} />
       </Routes>
     </div>
