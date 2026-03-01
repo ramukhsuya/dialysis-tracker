@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom'; // <-- THIS WAS MISSING!
 
 function Dashboard() {
   const [patients, setPatients] = useState([]);
@@ -18,9 +19,11 @@ function Dashboard() {
       ) : (
         <ul>
           {patients.map(patient => (
-            <li key={patient._id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #ccc' }}>
-              <strong>{patient.name}</strong> <br/>
-              MRN: {patient.mrn} | Dry Weight: {patient.dryWeight} kg
+            <li key={patient._id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #ccc', background: 'white', borderRadius: '5px' }}>
+              <Link to={`/patient/${patient._id}`} style={{ textDecoration: 'none', color: '#333' }}>
+                <strong style={{ fontSize: '18px', color: '#007bff' }}>{patient.name}</strong> <br/>
+                MRN: {patient.mrn} | Dry Weight: {patient.dryWeight} kg
+              </Link>
             </li>
           ))}
         </ul>

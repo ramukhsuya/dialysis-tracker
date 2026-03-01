@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import AddPatient from './components/AddPatient';
 import AddSession from './components/AddSession';
+import PatientDetails from './components/PatientDetails'; // <-- THIS WAS MISSING!
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/add-patient" element={<AddPatient />} />
         <Route path="/add-session" element={<AddSession />} />
+        <Route path="/patient/:id" element={<PatientDetails />} />
       </Routes>
     </div>
   );
