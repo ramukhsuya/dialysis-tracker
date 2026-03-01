@@ -3,6 +3,21 @@ const router = express.Router();
 const Session = require('../models/Session');
 const Patient = require('../models/Patient');
 
+// --- CLINICAL CONFIGURATION THRESHOLDS ---
+const CLINICAL_THRESHOLDS = {
+  maxWeightGain: 4.0, // maximum acceptable kg gained over dry weight
+  bp: {
+    systolicHigh: 160,
+    diastolicHigh: 100,
+    systolicLow: 90,
+    diastolicLow: 60
+  },
+  duration: {
+    targetHours: 4.0,
+    minHours: 3.0,
+    maxHours: 5.0
+  }
+};
 // POST: Log a session and check for anomalies
 router.post('/', async (req, res) => {
   try {
@@ -14,16 +29,16 @@ router.post('/', async (req, res) => {
 
     const anomalies = [];
 
-    // Anomaly Check 1: Fluid Overload (e.g., gaining more than 4kg over dry weight)
+    // Anomaly Check 1: Fluid Overload
     const weightGain = preWeight - patient.dryWeight;
-    if (weightGain > 4) {
+    if (weightGain > CLINICAL_THRESHOLDS.maxWeightGain) {
       anomalies.push(`High fluid weight gain: ${weightGain.toFixed(1)}kg over dry weight.`);
     }
 
     // Anomaly Check 2: Abnormal Blood Pressure
-    if (systolicBP > 160 || diastolicBP > 100) {
+    if (systolicBP > CLINICAL_THRESHOLDS.bp.systolicHigh || diastolicBP > CLINICAL_THRESHOLDS.bp.diastolicHigh) {
       anomalies.push(`Hypertension alert: ${systolicBP}/${diastolicBP}`);
-    } else if (systolicBP < 90 || diastolicBP < 60) {
+    } else if (systolicBP < CLINICAL_THRESHOLDS.bp.systolicLow || diastolicBP < CLINICAL_THRESHOLDS.bp.diastolicLow) {
       anomalies.push(`Hypotension alert: ${systolicBP}/${diastolicBP}`);
     }
 
@@ -33,10 +48,10 @@ router.post('/', async (req, res) => {
       const end = new Date(endTime);
       const durationHours = (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
       
-      if (durationHours < 3) {
-        anomalies.push(`Short session duration: ${durationHours.toFixed(1)} hrs (Target: 4 hrs)`);
-      } else if (durationHours > 5) {
-        anomalies.push(`Prolonged session: ${durationHours.toFixed(1)} hrs (Target: 4 hrs)`);
+      if (durationHours < CLINICAL_THRESHOLDS.duration.minHours) {
+        anomalies.push(`Short session duration: ${durationHours.toFixed(1)} hrs (Target: ${CLINICAL_THRESHOLDS.duration.targetHours} hrs)`);
+      } else if (durationHours > CLINICAL_THRESHOLDS.duration.maxHours) {
+        anomalies.push(`Prolonged session: ${durationHours.toFixed(1)} hrs (Target: ${CLINICAL_THRESHOLDS.duration.targetHours} hrs)`);
       }
     }
 
@@ -56,17 +71,15 @@ router.post('/', async (req, res) => {
 // GET: Fetch today's schedule
 router.get('/today', async (req, res) => {
   try {
-    // Get the start and end of the current day
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Find sessions happening today and pull in the patient's name and MRN
     const todaysSessions = await Session.find({
       startTime: { $gte: startOfDay, $lte: endOfDay }
-    }).populate('patientId', 'name mrn'); // This connects the Session to the Patient model!
+    }).populate('patientId', 'name mrn'); 
 
     res.json(todaysSessions);
   } catch (error) {
@@ -77,7 +90,6 @@ router.get('/today', async (req, res) => {
 // GET: Fetch all sessions for a specific patient
 router.get('/:patientId', async (req, res) => {
   try {
-    // Sort by startTime descending (newest first)
     const sessions = await Session.find({ patientId: req.params.patientId }).sort({ startTime: -1 });
     res.json(sessions);
   } catch (error) {
@@ -85,13 +97,13 @@ router.get('/:patientId', async (req, res) => {
   }
 });
 
-//Update nurse notes for a specific session
+// PUT: Update nurse notes for a specific session
 router.put('/:id/notes', async (req, res) => {
   try {
     const updatedSession = await Session.findByIdAndUpdate(
       req.params.id,
       { nurseNotes: req.body.nurseNotes },
-      { new: true } // This tells MongoDB to return the updated document
+      { new: true } 
     );
     if (!updatedSession) return res.status(404).json({ message: 'Session not found' });
     res.json(updatedSession);
