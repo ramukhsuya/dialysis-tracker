@@ -53,7 +53,7 @@ function Dashboard() {
               checked={filterAnomalies} 
               onChange={(e) => setFilterAnomalies(e.target.checked)} 
             />
-            Show Anomalies Only 🚨
+            Show Anomalies Only
           </label>
         </div>
 
@@ -77,7 +77,7 @@ function Dashboard() {
                 
                 {session.anomalies && session.anomalies.length > 0 && (
                   <div style={{ marginTop: '10px', color: '#d32f2f', fontSize: '14px', fontWeight: 'bold', background: '#ffebee', padding: '8px', borderRadius: '4px' }}>
-                    ⚠️ {session.anomalies.join(' | ')}
+                     {session.anomalies.join(' | ')}
                   </div>
                 )}
               </li>

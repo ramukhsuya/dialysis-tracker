@@ -19,12 +19,12 @@ function AddPatient() {
     e.preventDefault();
     try {
       await axios.post('http://localhost:5000/api/patients', formData);
-      setMessage('✅ Patient successfully registered!');
+      setMessage('Patient successfully registered!');
       // Clear the form after success
       setFormData({ name: '', mrn: '', dryWeight: '', dateOfBirth: '', gender: '' }); 
     } catch (error) {
       console.error("Error adding patient:", error);
-      setMessage('❌ Failed to add patient. Ensure MRN is unique.');
+      setMessage('Failed to add patient. Ensure MRN is unique.');
     }
   };
 

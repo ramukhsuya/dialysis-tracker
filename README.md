@@ -1,10 +1,10 @@
-# Dialysis Patient Tracker
+#  Dialysis Patient Tracker
 
 A full-stack application designed for dialysis clinics to register patients, log treatment sessions, and automatically flag clinical anomalies (like fluid overload or abnormal blood pressure) in real-time.
 
 ---
 
-## Quick Setup (Under 5 Minutes)
+##  Quick Setup (Under 5 Minutes)
 
 **Prerequisites:** Node.js installed, and MongoDB running locally (or a valid MongoDB URI).
 
@@ -33,7 +33,7 @@ A full-stack application designed for dialysis clinics to register patients, log
 
 ---
 
-## Architecture Overview
+##  Architecture Overview
 
 This project utilizes a standard **MERN Stack** (MongoDB, Express, React, Node.js) separated into two distinct services:
 
@@ -45,7 +45,7 @@ This project utilizes a standard **MERN Stack** (MongoDB, Express, React, Node.j
 
 ---
 
-## Clinical Assumptions & Trade-offs
+##  Clinical Assumptions & Trade-offs
 
 **Configuration & Avoiding "Magic Numbers":**
 To ensure the application is easily maintainable and adheres to best clinical practices, no "magic numbers" are scattered throughout the business logic. All clinical thresholds have been centralized into a `CLINICAL_THRESHOLDS` configuration object located at the top of `backend/routes/sessions.js`.
@@ -55,9 +55,11 @@ Based on standard hemodialysis practices, the following assumptions were encoded
 
 1. **Excess Interdialytic Weight Gain (IDWG):** * **Threshold:** `> 4.0 kg` over dry weight.
    * **Justification:** IDWG greater than 4kg generally indicates significant fluid overload, increasing cardiovascular risk and requiring aggressive ultrafiltration, which the nursing staff needs to be alerted to immediately.
+
 2. **Abnormal Blood Pressure:** * **Hypertension Threshold:** Systolic `> 160` OR Diastolic `> 100`. 
    * **Hypotension Threshold:** Systolic `< 90` OR Diastolic `< 60`.
    * **Justification:** These conservative thresholds ensure nurses are alerted to impending intradialytic hypotension or severe hypertensive episodes *before* initiating treatment.
+
 3. **Abnormal Session Duration:** * **Target:** `4.0 hours` (Flagged if `< 3.0 hours` or `> 5.0 hours`).
    * **Justification:** Standard thrice-weekly hemodialysis requires roughly 4 hours for adequate clearance (Kt/V). Sessions shorter than 3 hours risk under-dialysis, while > 5 hours may indicate machine complications or non-standard prolonged therapies requiring clinical review.
 
@@ -78,6 +80,16 @@ Based on standard hemodialysis practices, the following assumptions were encoded
 1. **Authentication:** Currently lacks RBAC (Role-Based Access Control). Future versions will implement JWT authentication to separate 'Nurse' vs 'Admin/Nephrologist' views.
 2. **Pagination:** The dashboard currently fetches all patients and today's sessions at once. This needs server-side pagination for production scale.
 3. **Enhanced Filtering:** Allow doctors to filter session histories by specific date ranges or specific types of anomalies.
+
+---
+
+## AI Tools Usage
+
+In the spirit of transparency, generative AI (Gemini) was utilized as an assistive tool during the development of this project. 
+
+* **What AI was used for:** I used AI primarily as a sounding board for architecture brainstorming (structuring the MERN stack components) and for generating structural boilerplate (e.g., scaffolding the basic Express routes, React component shells, and the initial `seed.js` data generation script).
+* **What I reviewed and changed manually:** I manually reviewed all generated code to ensure it fit the specific clinical requirements. I took ownership of the UI/UX layout, manually wired up the React state management (`useState`, `useEffect`), and explicitly enforced the extraction of "magic numbers" into centralized configuration objects to ensure maintainability.
+* **Where I disagreed with the AI and why:** During the implementation of the anomaly detection logic, the AI initially generated an Express POST route that executed the duration anomaly check *after* the MongoDB document had already been constructed and saved. I caught this logical flaw during testing, as the database was silently dropping the duration alerts. I manually restructured the order of operations in the backend controller to ensure all three anomaly checks (weight, BP, duration) fully resolved *before* the session payload was committed to the database.
 
 ---
 

@@ -34,7 +34,7 @@ function AddSession() {
     
     try {
       const response = await axios.post('http://localhost:5000/api/sessions', formData);
-      setMessage('✅ Session successfully logged!');
+      setMessage('Session successfully logged!');
 
       // If the backend detected anomalies, grab them and display them!
       if (response.data.anomalies && response.data.anomalies.length > 0) {
@@ -45,7 +45,7 @@ function AddSession() {
       setFormData({ patientId: '', startTime: '', endTime: '', preWeight: '', systolicBP: '', diastolicBP: '', machineId: '', nurseNotes: '' });
     } catch (error) {
       console.error("Error adding session:", error);
-      setMessage('❌ Failed to log session. Please check the inputs.');
+      setMessage('Failed to log session. Please check the inputs.');
     }
   };
 
@@ -55,7 +55,7 @@ function AddSession() {
       
       {message && <p style={{ fontWeight: 'bold' }}>{message}</p>}
 
-      {/* 🚨 THE ANOMALY ALERT BOX 🚨 */}
+      {/* THE ANOMALY ALERT BOX */}
       {anomalies.length > 0 && (
         <div style={{ background: '#ffebee', color: '#c62828', padding: '15px', borderRadius: '5px', marginBottom: '15px', border: '1px solid #ef9a9a' }}>
           <h3 style={{ margin: '0 0 10px 0' }}>⚠️ Clinical Alerts Triggered!</h3>
