@@ -94,6 +94,4 @@ In the spirit of transparency, generative AI (Gemini) was utilized as an assisti
 ---
 
 ## Demo
-
-* **Live Deployment:** [Placeholder for Render Link]
-* **Video Walkthrough:** [Placeholder for YouTube Link]
+* **Video Walkthrough:** https://www.youtube.com/watch?v=g1vmhPhbhi4
