@@ -85,4 +85,19 @@ router.get('/:patientId', async (req, res) => {
   }
 });
 
+//Update nurse notes for a specific session
+router.put('/:id/notes', async (req, res) => {
+  try {
+    const updatedSession = await Session.findByIdAndUpdate(
+      req.params.id,
+      { nurseNotes: req.body.nurseNotes },
+      { new: true } // This tells MongoDB to return the updated document
+    );
+    if (!updatedSession) return res.status(404).json({ message: 'Session not found' });
+    res.json(updatedSession);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;
