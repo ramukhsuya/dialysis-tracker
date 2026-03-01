@@ -39,6 +39,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET: Fetch today's schedule
+router.get('/today', async (req, res) => {
+  try {
+    // Get the start and end of the current day
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Find sessions happening today and pull in the patient's name and MRN
+    const todaysSessions = await Session.find({
+      startTime: { $gte: startOfDay, $lte: endOfDay }
+    }).populate('patientId', 'name mrn'); // This connects the Session to the Patient model!
+
+    res.json(todaysSessions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET: Fetch all sessions for a specific patient
 router.get('/:patientId', async (req, res) => {
   try {
