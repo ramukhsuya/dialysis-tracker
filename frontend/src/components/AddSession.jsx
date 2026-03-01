@@ -6,6 +6,7 @@ function AddSession() {
   const [formData, setFormData] = useState({
     patientId: '',
     startTime: '',
+    endTime: '', 
     preWeight: '',
     systolicBP: '',
     diastolicBP: '',
@@ -40,8 +41,8 @@ function AddSession() {
         setAnomalies(response.data.anomalies);
       }
 
-      // Clear the form for the next entry
-      setFormData({ patientId: '', startTime: '', preWeight: '', systolicBP: '', diastolicBP: '', machineId: '', nurseNotes: '' });
+      // Clear the form for the next entry (now includes endTime!)
+      setFormData({ patientId: '', startTime: '', endTime: '', preWeight: '', systolicBP: '', diastolicBP: '', machineId: '', nurseNotes: '' });
     } catch (error) {
       console.error("Error adding session:", error);
       setMessage('❌ Failed to log session. Please check the inputs.');
@@ -78,6 +79,10 @@ function AddSession() {
 
         <label style={{ marginBottom: '-10px', fontSize: '14px', color: '#555' }}>Start Time:</label>
         <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleChange} required style={{ padding: '8px' }} />
+        
+        {/* NEW END TIME INPUT */}
+        <label style={{ marginBottom: '-10px', fontSize: '14px', color: '#555' }}>End Time:</label>
+        <input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleChange} required style={{ padding: '8px' }} />
         
         <input type="number" name="preWeight" placeholder="Pre-Dialysis Weight (kg)" step="0.1" value={formData.preWeight} onChange={handleChange} required style={{ padding: '8px' }} />
         
