@@ -71,8 +71,6 @@ Based on standard hemodialysis practices, the following assumptions were encoded
 ## Testing & Seed Data
 
 * **Populate Dummy Data:** Run `node seed.js` (inside the backend folder) to automatically populate the database with example patients and treatment sessions.
-* **Run Tests:** Navigate to the `backend` folder and run `npm test` to execute the automated test suite covering core business logic and API routes.
-
 ---
 
 ## Known Limitations & Future Work
