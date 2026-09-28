@@ -1,109 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
   const [patients, setPatients] = useState([]);
   const [todaysSessions, setTodaysSessions] = useState([]);
-  const [filterAnomalies, setFilterAnomalies] = useState(false); // NEW: State for our filter toggle
-
-  useEffect(() => {
-    // Fetch all patients
-    axios.get('http://localhost:5000/api/patients')
-      .then(response => setPatients(response.data))
-      .catch(error => console.error("Error fetching patients:", error));
-
-    // Fetch today's schedule
-    axios.get('http://localhost:5000/api/sessions/today')
-      .then(response => setTodaysSessions(response.data))
-      .catch(error => console.error("Error fetching schedule:", error));
-  }, []);
-
-  // NEW: Filter the sessions before we display them!
-  const displayedSessions = filterAnomalies 
-    ? todaysSessions.filter(session => session.anomalies && session.anomalies.length > 0)
-    : todaysSessions;
-
-  // NEW: Helper function to calculate status based on current time
-  const getSessionStatus = (startTime, endTime) => {
-    const now = new Date();
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    
-    // If there is no end time (older sessions), just assume completed if start time has passed
-    if (!endTime) return now > start ? <span style={{ color: '#388e3c', fontWeight: 'bold' }}>✅ Completed</span> : <span style={{ color: '#f57c00', fontWeight: 'bold' }}>⏳ Not Started</span>;
-
-    if (now < start) return <span style={{ color: '#f57c00', fontWeight: 'bold' }}>⏳ Not Started</span>;
-    if (now >= start && now <= end) return <span style={{ color: '#1976d2', fontWeight: 'bold' }}>🔄 In Progress</span>;
-    return <span style={{ color: '#388e3c', fontWeight: 'bold' }}>✅ Completed</span>;
-  };
-
-  return (
-    <div>
-      {/* TODAY'S SCHEDULE SECTION */}
-      <div style={{ background: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid #90caf9' }}>
-        
-        {/* NEW: Flexbox header to put the title and the filter toggle on the same line */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h2 style={{ margin: 0, color: '#1565c0' }}>📅 Today's Dialysis Schedule</h2>
-          
-          <label style={{ cursor: 'pointer', background: 'white', padding: '8px 12px', borderRadius: '5px', border: '1px solid #ccc', fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <input 
-              type="checkbox" 
-              checked={filterAnomalies} 
-              onChange={(e) => setFilterAnomalies(e.target.checked)} 
-            />
-            Show Anomalies Only
-          </label>
-        </div>
-
-        {displayedSessions.length === 0 ? (
-          <p>{filterAnomalies ? "No anomalous sessions found today! 🎉" : "No sessions scheduled for today yet."}</p>
-        ) : (
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {displayedSessions.map(session => (
-              <li key={session._id} style={{ background: 'white', padding: '15px', marginBottom: '10px', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '10px' }}>
-                  <strong style={{ fontSize: '16px' }}>{session.patientId ? session.patientId.name : 'Unknown Patient'}</strong>
-                  {/* Render the dynamic status */}
-                  {getSessionStatus(session.startTime, session.endTime)}
-                </div>
-                
-                <strong>Time:</strong> {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
-                {session.endTime ? ` - ${new Date(session.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''} <br/>
-                
-                <strong>Machine:</strong> {session.machineId} <br/>
-                <strong>BP:</strong> {session.systolicBP}/{session.diastolicBP} | <strong>Pre-Weight:</strong> {session.preWeight} kg
-                
-                {session.anomalies && session.anomalies.length > 0 && (
-                  <div style={{ marginTop: '10px', color: '#d32f2f', fontSize: '14px', fontWeight: 'bold', background: '#ffebee', padding: '8px', borderRadius: '4px' }}>
-                     {session.anomalies.join(' | ')}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* REGISTERED PATIENTS SECTION */}
-      <h2>Registered Patients</h2>
-      {patients.length === 0 ? (
-        <p>Loading patients...</p>
-      ) : (
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {patients.map(patient => (
-            <li key={patient._id} style={{ marginBottom: '10px', padding: '15px', border: '1px solid #ccc', background: 'white', borderRadius: '5px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              <Link to={`/patient/${patient._id}`} style={{ textDecoration: 'none', color: '#333', display: 'block' }}>
-                <strong style={{ fontSize: '18px', color: '#007bff' }}>{patient.name}</strong> <br/>
-                <span style={{ color: '#666' }}>MRN: {patient.mrn} | Dry Weight: {patient.dryWeight} kg</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+  const [filterAnomalies, setFilterAnomalies] = useState(false);
+  useEffect(() => { axios.get('http://localhost:5000/api/patients').then(({ data }) => setPatients(data)).catch(console.error); axios.get('http://localhost:5000/api/sessions/today').then(({ data }) => setTodaysSessions(data)).catch(console.error); }, []);
+  const displayedSessions = filterAnomalies ? todaysSessions.filter(({ anomalies }) => anomalies?.length) : todaysSessions;
+  const status = (startTime, endTime) => { const now = new Date(); const start = new Date(startTime); const end = endTime && new Date(endTime); if (!end || now > end) return ['Completed', 'status-complete']; if (now < start) return ['Scheduled', 'status-pending']; return ['In progress', 'status-active']; };
+  return <><section className="dashboard-hero"><span className="hero-label">TODAY AT A GLANCE</span><h2>Dialysis care, made clear.</h2><p>Review today’s treatment schedule and bring attention to sessions that need follow-up.</p><div className="schedule-toolbar"><span>{todaysSessions.length} session{todaysSessions.length === 1 ? '' : 's'} scheduled today</span><label className="filter-control"><input type="checkbox" checked={filterAnomalies} onChange={(e) => setFilterAnomalies(e.target.checked)} /> Show alerts only</label></div></section><section><div className="section-title"><h2>Today’s schedule</h2><span>{filterAnomalies ? 'Alert view' : 'All sessions'}</span></div>{displayedSessions.length === 0 ? <div className="empty-state">{filterAnomalies ? 'No clinical alerts were found in today’s schedule.' : 'No sessions are scheduled for today.'}</div> : <ul className="session-list">{displayedSessions.map((session) => { const [label, statusClass] = status(session.startTime, session.endTime); return <li className="session-card" key={session._id}><div className="card-top"><strong className="card-name">{session.patientId?.name || 'Unknown patient'}</strong><span className={`status ${statusClass}`}>{label}</span></div><div className="session-meta"><span><b>Time</b> {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{session.endTime && ` – ${new Date(session.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</span><span><b>Machine</b> {session.machineId}</span><span><b>BP</b> {session.systolicBP}/{session.diastolicBP}</span><span><b>Pre-weight</b> {session.preWeight} kg</span></div>{session.anomalies?.length > 0 && <div className="alert-box">Clinical alert: {session.anomalies.join(' · ')}</div>}</li>; })}</ul>}</section><section className="patient-section"><div className="section-title"><h2>Registered patients</h2><span>{patients.length} total</span></div>{patients.length === 0 ? <div className="empty-state">No patients have been registered yet.</div> : <ul className="patient-list">{patients.map((patient) => <li className="patient-card" key={patient._id}><Link to={`/patient/${patient._id}`}><strong>{patient.name}</strong><span>MRN {patient.mrn} · Dry weight {patient.dryWeight} kg</span></Link></li>)}</ul>}</section></>;
 }
-
 export default Dashboard;

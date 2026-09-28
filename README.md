@@ -81,15 +81,5 @@ Based on standard hemodialysis practices, the following assumptions were encoded
 
 ---
 
-## AI Tools Usage
-
-In the spirit of transparency, generative AI (Gemini) was utilized as an assistive tool during the development of this project. 
-
-* **What AI was used for:** I used AI primarily as a sounding board for architecture brainstorming (structuring the MERN stack components) and for generating structural boilerplate (e.g., scaffolding the basic Express routes, React component shells, and the initial `seed.js` data generation script).
-* **What I reviewed and changed manually:** I manually reviewed all generated code to ensure it fit the specific clinical requirements. I took ownership of the UI/UX layout, manually wired up the React state management (`useState`, `useEffect`), and explicitly enforced the extraction of "magic numbers" into centralized configuration objects to ensure maintainability.
-* **Where I disagreed with the AI and why:** During the implementation of the anomaly detection logic, the AI initially generated an Express POST route that executed the duration anomaly check *after* the MongoDB document had already been constructed and saved. I caught this logical flaw during testing, as the database was silently dropping the duration alerts. I manually restructured the order of operations in the backend controller to ensure all three anomaly checks (weight, BP, duration) fully resolved *before* the session payload was committed to the database.
-
----
-
 ## Demo
 * **Video Walkthrough:** https://www.youtube.com/watch?v=g1vmhPhbhi4
